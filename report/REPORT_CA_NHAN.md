@@ -1,6 +1,6 @@
 # Báo cáo cá nhân — Lab 9: Evaluation & Failure Analysis
 
-**Người thực hiện:** chủ repo `Namtran1203` (họ tên và MSSV chưa được cung cấp)
+**Người thực hiện:** Trần Thành Nam — MSSV 2A202603564 (`Namtran1203`)
 
 **Ngày thực hiện:** 18/11/2026
 
@@ -41,10 +41,10 @@ Baseline v2 `E-swarm-20261118-ed09` có `pass_rate=0.9786`, `pass_hat_5=0.8929`,
 
 ## 6. Giới hạn và công việc trước nộp
 
-Dependencies đã được cài trong `lab9/src/.venv` (pydantic-evals 2.68.0, NumPy 2.5.5, SciPy 1.18.1). Smoke test M0 PASS; **23 test Lab 9 công khai qua**. Các report đã được sinh lại bằng pydantic-evals và CI của SciPy. Eval set v1/v2 sạch; gate v1 đúng hướng. CI GitHub và test ẩn vẫn chưa có kết quả vì nhánh chưa được đẩy lên remote.
+Dependencies đã được cài trong `lab9/src/.venv` (pydantic-evals 2.68.0, NumPy 2.5.5, SciPy 1.18.1). Smoke test M0 PASS; **23 test Lab 9 công khai qua**. Các report đã được sinh lại bằng pydantic-evals và CI của SciPy. Eval set v1/v2 sạch; gate v1 đúng hướng. Trạng thái CI GitHub và test ẩn chưa được xác minh trong lần kiểm tra này.
 
 Shape `swarm` gốc không ghi event `reply`; điểm 1.0 của `reply_ledger_correct` trên baseline chỉ có nghĩa metric chưa quan sát được ở shape này. Các variant Lab 9 có event reply nên FM-08 được kiểm trực tiếp. Việc yêu cầu mọi shape ghi reply là bước tiếp theo để đóng khoảng trống quan sát.
 
-Kết quả chỉ phản ánh MockLLM và 14/28 item công khai; không đo trên người dùng thật. Judge mới chỉ được calibration bằng CSV replay công khai, thiếu held-out độc lập. Với 5 seed, một lỗi chỉ xuất hiện ở 1/3 seed chưa chắc bị phát hiện ổn định. Tôi chưa có họ tên/MSSV để điền, và chưa có bằng chứng CI GitHub hoặc PR merge.
+Kết quả chỉ phản ánh MockLLM và 14/28 item công khai; không đo trên người dùng thật. Judge mới chỉ được calibration bằng CSV replay công khai, thiếu held-out độc lập. Với 5 seed, một lỗi chỉ xuất hiện ở 1/3 seed chưa chắc bị phát hiện ổn định. Chưa có bằng chứng CI GitHub hoặc PR merge trong lần kiểm tra này.
 
 Tôi cũng thử các test Day 8 ngoài phạm vi Lab 9; một số shape mẫu (`workflow`, `single`, `orchestrator`) không đạt ma trận công khai của Day 8 gốc. Bài Lab 9 dùng shape `swarm` gốc, nên các lỗi đó không được tính là kết quả gate Lab 9.

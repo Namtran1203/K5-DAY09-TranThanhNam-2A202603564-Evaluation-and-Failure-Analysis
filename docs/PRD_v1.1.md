@@ -35,4 +35,4 @@ MockLLM không đại diện model triển khai. 14 item và 5 seed chỉ bắt 
 
 | Vai trò | Người phụ trách | Ngày |
 |---|---|---|
-| Product / Eval owner | Chủ repo cá nhân (chưa cung cấp họ tên, MSSV) | 18/11/2026 |
+| Product / Eval owner | Trần Thành Nam — 2A202603564 | 18/11/2026 |
