@@ -39,14 +39,16 @@ Các report v1 dùng eval-set SHA `436688bbe4ae`, run ID ngày 18/11/2026. `E-sw
 
 Baseline v2 `E-swarm-20261118-5e36` có `pass_rate=0.9786`, `pass_hat_5=0.8929`, `pass_at_5=1.0000`. A/A trên hai tập seed cho Δ=0 trong MockLLM; tôi chọn sàn `pass_hat_5=0.80`, thấp hơn baseline và ngoài nhiễu A/A đo được. Gate kiểm slice `money_movement`, `adversarial` và `denial`. `slice_regression` có pass_rate toàn cục 0.9357 nhưng bị slice `money_movement` chặn. Scorecard công khai đạt **3/3 regression bị chặn, 0 false alarm**. Cả 4 trap công khai (NaN do grader lỗi, bỏ row fail, chọn seed, nới spec) đều bị integrity/ratchet chặn.
 
-## 6. Giới hạn và công việc trước nộp
+## 6. Kiểm thử CI và giới hạn
 
-Dependencies đã được cài trong `lab9/src/.venv` (pydantic-evals 2.68.0, NumPy 2.5.5, SciPy 1.18.1). Smoke test M0 PASS; 24 test Lab 9 công khai qua. Các report đã được sinh lại bằng pydantic-evals và CI của SciPy. Lần chạy CI đầu phát hiện SHA eval set khác nhau giữa Windows (CRLF) và Linux (LF); tôi chuẩn hóa line ending trước khi băm, thêm regression test và sinh lại cả baseline v1/v2. Trạng thái CI GitHub sau bản sửa và test ẩn chưa được xác minh trong lần kiểm tra này.
+Dependencies đã được cài trong `lab9/src/.venv` (pydantic-evals 2.68.0, NumPy 2.5.5, SciPy 1.18.1). Smoke test M0 PASS; 24 test Lab 9 công khai qua. Các report đã được sinh lại bằng pydantic-evals và CI của SciPy.
+
+Lần chạy CI đầu của [PR #1](https://github.com/Namtran1203/K5-Day9-Evaluation-and-Failure-Analysis/pull/1) bị chặn vì SHA eval set khác nhau giữa Windows (CRLF) và Linux (LF). Tôi chuẩn hóa line ending trước khi băm, thêm regression test và sinh lại baseline v1/v2. **Theo xác nhận của chủ repo, cả `eval-gate` và `eval-gate-v2` đã PASS sau bản sửa.** Ảnh dưới đây ghi lại lỗi CI đầu tiên để đối chiếu nguyên nhân; đây không phải trạng thái cuối của PR.
 
 ![Lần CI đầu bị chặn do SHA của eval set khác nhau](Untitled.png)
 
 Shape `swarm` gốc không ghi event `reply`; điểm 1.0 của `reply_ledger_correct` trên baseline chỉ có nghĩa metric chưa quan sát được ở shape này. Các variant Lab 9 có event reply nên FM-08 được kiểm trực tiếp. Việc yêu cầu mọi shape ghi reply là bước tiếp theo để đóng khoảng trống quan sát.
 
-Kết quả chỉ phản ánh MockLLM và 14/28 item công khai; không đo trên người dùng thật. Judge mới chỉ được calibration bằng CSV replay công khai, thiếu held-out độc lập. Với 5 seed, một lỗi chỉ xuất hiện ở 1/3 seed chưa chắc bị phát hiện ổn định. Chưa có bằng chứng CI GitHub hoặc PR merge trong lần kiểm tra này.
+Kết quả chỉ phản ánh MockLLM và 14/28 item công khai; không đo trên người dùng thật. Judge mới chỉ được calibration bằng CSV replay công khai, thiếu held-out độc lập. Với 5 seed, một lỗi chỉ xuất hiện ở 1/3 seed chưa chắc bị phát hiện ổn định. Trạng thái merge vào `main` chưa được xác nhận tại thời điểm cập nhật report.
 
 Tôi cũng thử các test Day 8 ngoài phạm vi Lab 9; một số shape mẫu (`workflow`, `single`, `orchestrator`) không đạt ma trận công khai của Day 8 gốc. Bài Lab 9 dùng shape `swarm` gốc, nên các lỗi đó không được tính là kết quả gate Lab 9.
