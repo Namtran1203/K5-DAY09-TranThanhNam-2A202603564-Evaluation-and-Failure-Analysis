@@ -11,7 +11,7 @@ Trần Thành Nam — 2A202603564. PR từ `starter/d09` vào `main` **trong for
 ## Kiểm tra
 
 - `python -m lab9.smoke`: M0 PASS.
-- `pytest -q -m student -o addopts= -k lab9`: 23 passed.
+- `pytest -q -m student -o addopts= -k lab9`: 24 passed.
 - `lab9.evalset --check` và `--v2 --check`: 0 problem(s).
 - `lab9.mutation --detect`: detection 100%, false alarms 0%.
 - Scorecard v2: `mutation score 3/3 · false alarms 0`.
@@ -20,7 +20,7 @@ Trần Thành Nam — 2A202603564. PR từ `starter/d09` vào `main` **trong for
 ## Gate v1: hồi quy bị chặn
 
 ```text
-gate: PR E-seeded_regression-20261118-db04 vs main E-swarm-20261118-db04 · eval set db047e049492
+gate: PR E-seeded_regression-20261118-4366 vs main E-swarm-20261118-4366 · eval set 436688bbe4ae
   refund_amount_correct  0.8571  Δ -0.129 CI [-0.315, +0.000] BLOCK
   proposal_correct       0.7857  Δ -0.200 CI [-0.414, +0.000] BLOCK
   pass_rate              0.7143  Δ -0.271 CI [-0.500, -0.057] BLOCK

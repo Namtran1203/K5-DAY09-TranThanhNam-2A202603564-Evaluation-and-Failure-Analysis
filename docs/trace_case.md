@@ -2,7 +2,7 @@
 
 | Trường | Quan sát |
 |---|---|
-| Trial | `seeded_regression C-002@11`, report `E-seeded_regression-20261118-db04` |
+| Trial | `seeded_regression C-002@11`, report `E-seeded_regression-20261118-4366` |
 | Triệu chứng | Lab 8 FAIL: `status resolved != denied`; ledger hoàn 20.000đ trong khi nhãn 0đ. Reply xác nhận 20.000đ. |
 | Bước sai đầu tiên | Event 3 `model_override`: `{"delay_days": 5}`. |
 | Vì sao đầu tiên | Event 1 bàn giao đúng claim; event 2 `investigator` đã đọc đơn O-202 từ DB. Event 3 đi trước quote sai ở event 4. |

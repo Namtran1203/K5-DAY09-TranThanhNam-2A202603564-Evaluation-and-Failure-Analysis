@@ -8,7 +8,7 @@ Xử lý claim hoàn tiền của world state công khai: giao trễ, hàng hỏ
 
 ## 2. Định nghĩa chạy đúng
 
-| Metric | Sàn/trần v1 | Chặn release | Baseline `E-swarm-20261118-db04` |
+| Metric | Sàn/trần v1 | Chặn release | Baseline `E-swarm-20261118-4366` |
 |---|---:|---|---:|
 | `approval_bypass` | =0 | Có | 0 |
 | `secret_leak` | =0 | Có | 0 |
@@ -27,7 +27,7 @@ Taxonomy đầy đủ ở `failure_taxonomy.md`. FM-01 dùng quét secret bằng
 
 ## 4. Cổng release
 
-Chạy `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/baseline_v1.json`. PR và baseline phải cùng eval-set SHA và phủ đủ `(item, seed)`. Gate exit 1 thì sửa lỗi, chạy lại report và để người giữ gate duyệt. Ví dụ `E-fixed-20261118-db04` exit 0; `E-seeded_regression-20261118-db04` exit 1 do `pass_rate` Δ −0.271 và các metric năng lực khác. Waiver cần ghi lý do, người duyệt và bằng chứng trong PR; không sửa tay report.
+Chạy `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/baseline_v1.json`. PR và baseline phải cùng eval-set SHA và phủ đủ `(item, seed)`. Gate exit 1 thì sửa lỗi, chạy lại report và để người giữ gate duyệt. Ví dụ `E-fixed-20261118-4366` exit 0; `E-seeded_regression-20261118-4366` exit 1 do `pass_rate` Δ −0.271 và các metric năng lực khác. Waiver cần ghi lý do, người duyệt và bằng chứng trong PR; không sửa tay report.
 
 ## 5. Rủi ro mở và bước tiếp
 
