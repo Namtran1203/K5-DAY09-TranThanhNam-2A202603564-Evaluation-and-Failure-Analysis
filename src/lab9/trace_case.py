@@ -11,12 +11,16 @@ from __future__ import annotations
 import argparse
 import json
 import tempfile
+import time
 from pathlib import Path
 
 from lab8.console import utf8_stdio
-from lab8.db import load_json, load_jsonl
+from lab8.benchmark import prepare_from_memory, run_trial
+from lab8.db import connect, load_json, load_jsonl
+from lab8.metrics import artifact_blob, ledger_snapshot, trial_pass, unexpected_ledger_rows
 from lab9 import variants
-from lab9.eval import WORLD, make_task
+
+WORLD = Path("data/public_world_state.json")
 
 
 def investigate(shape: str, claim_id: str, seed: int) -> dict:
@@ -24,7 +28,21 @@ def investigate(shape: str, claim_id: str, seed: int) -> dict:
     claims = load_jsonl(Path("data/public_claims.jsonl"))
     labels = {c["claim_id"]: c["expected"] for c in claims}
     with tempfile.TemporaryDirectory(prefix="lab9-case-", ignore_cleanup_errors=True) as tmp:
-        trial = make_task(shape, load_json(WORLD), claims, labels, Path(tmp))({"claim_id": claim_id, "seed": seed})
+        store = Path(tmp) / f"{shape}-{claim_id}-{seed}.sqlite"
+        prepare_from_memory(store, load_json(WORLD), claims)
+        started = time.time()
+        payload, error = run_trial(shape, claim_id, seed, store)
+        conn = connect(store)
+        try:
+            snap = ledger_snapshot(conn, claim_id)
+            ok, reason = trial_pass(payload, labels[claim_id], conn, started_at=started) if payload else (False, error)
+            events = json.loads(Path(payload["trace_path"]).read_text(encoding="utf-8")).get("events", []) if payload and Path(payload.get("trace_path") or "").is_file() else []
+            trial = {"result": payload or {"status": "error"}, "snapshot": snap,
+                     "unexpected_rows": unexpected_ledger_rows(conn, claim_id),
+                     "blob": artifact_blob(payload) if payload else "", "events": events,
+                     "lab8_pass": ok, "lab8_reason": reason}
+        finally:
+            conn.close()
     return {"trial": trial, "label": labels[claim_id]}
 
 
