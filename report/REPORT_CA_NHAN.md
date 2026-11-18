@@ -33,7 +33,7 @@ Các report v1 dùng eval-set SHA `db047e049492`, run ID ngày 18/11/2026. `E-sw
 | `reply_ledger_correct` | 1.0000 | 1.0000 | 0.7857 |
 | `pass_5` | 0.9286 | 1.0000 | 0.7143 |
 
-Ở `pass_rate`, regression giảm **0.271**; CI paired bootstrap local 95% [−0.514, −0.071], nằm hoàn toàn dưới 0. Gate đồng thời chặn ở `refund_amount_correct`, `proposal_correct`, `reply_ledger_correct`. Detection của các grader trên những row `seeded_regression` fail là **100%**, false alarm trên `fixed` là **0%**. Hai safety metric `approval_bypass` và `secret_leak` đều bằng 0 ở ba report v1.
+Ở `pass_rate`, regression giảm **0.271**; CI paired bootstrap SciPy 95% [−0.500, −0.057], nằm hoàn toàn dưới 0. Gate đồng thời chặn ở `refund_amount_correct`, `proposal_correct`, `reply_ledger_correct`. Detection của các grader trên những row `seeded_regression` fail là **100%**, false alarm trên `fixed` là **0%**. Hai safety metric `approval_bypass` và `secret_leak` đều bằng 0 ở ba report v1.
 
 ## 5. Nâng cao: slice, độ nhiễu và chống làm đẹp report
 
@@ -41,7 +41,7 @@ Baseline v2 `E-swarm-20261118-ed09` có `pass_rate=0.9786`, `pass_hat_5=0.8929`,
 
 ## 6. Giới hạn và công việc trước nộp
 
-Máy hiện tại không kết nối PyPI nên chưa cài được `pydantic-evals`, NumPy, SciPy. Report được sinh bằng nhánh replay offline chạy cùng shape và grader code; CI local dùng fallback Python. Khi dependencies sẵn có, cần chạy lại smoke, toàn bộ pytest và report bằng pydantic-evals/SciPy; mốc CI tham chiếu có thể lệch so với fallback. Phần đã kiểm tại chỗ: 18 test stats/advanced qua, eval set v1/v2 sạch, gate v1 đúng hướng, 4 trap và scorecard công khai qua. Năm test grader công khai chưa chạy được vì test import trực tiếp `pydantic_evals`.
+Dependencies đã được cài trong `lab9/src/.venv` (pydantic-evals 2.68.0, NumPy 2.5.5, SciPy 1.18.1). Smoke test M0 PASS; **23 test Lab 9 công khai qua**. Các report đã được sinh lại bằng pydantic-evals và CI của SciPy. Eval set v1/v2 sạch; gate v1 đúng hướng. CI GitHub và test ẩn vẫn chưa có kết quả vì nhánh chưa được đẩy lên remote.
 
 Shape `swarm` gốc không ghi event `reply`; điểm 1.0 của `reply_ledger_correct` trên baseline chỉ có nghĩa metric chưa quan sát được ở shape này. Các variant Lab 9 có event reply nên FM-08 được kiểm trực tiếp. Việc yêu cầu mọi shape ghi reply là bước tiếp theo để đóng khoảng trống quan sát.
 

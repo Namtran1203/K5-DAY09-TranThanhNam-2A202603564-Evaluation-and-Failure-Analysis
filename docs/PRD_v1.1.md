@@ -19,7 +19,7 @@ Xử lý claim hoàn tiền của world state công khai: giao trễ, hàng hỏ
 | `db_fact_kept` | ≥0.95 | Cảnh báo | 0.9857 |
 | `pass_5`, `cost_per_success` | Theo dõi | Không | 0.9286; 49.567 |
 
-“Giảm có ý nghĩa” nghĩa là CI paired bootstrap 95% của Δ (PR − baseline) nằm hoàn toàn dưới 0. Với thiếu wheel trong môi trường hiện tại, CI local cần chạy lại bằng SciPy trước khi dùng làm bằng chứng nộp.
+“Giảm có ý nghĩa” nghĩa là CI paired bootstrap 95% của Δ (PR − baseline) nằm hoàn toàn dưới 0. Report đã được chạy lại bằng SciPy trong `.venv`.
 
 ## 3. Failure mode và grader
 
@@ -31,7 +31,7 @@ Chạy `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/ba
 
 ## 5. Rủi ro mở và bước tiếp
 
-MockLLM không đại diện model triển khai. 14 item và 5 seed chỉ bắt hồi quy lớn; judge replay chưa có held-out độc lập. Cần cài dependencies, chạy lại pydantic-evals + SciPy và CI GitHub trước khi merge. Tăng eval-set version khi thêm item hoặc nhãn; tăng metric-spec version khi đổi metric/ngưỡng và không nới ngưỡng trong cùng version.
+MockLLM không đại diện model triển khai. 14 item và 5 seed chỉ bắt hồi quy lớn; judge replay chưa có held-out độc lập. Smoke và test Lab 9 đã qua trong `.venv`; vẫn cần CI GitHub trên PR trước khi merge. Tăng eval-set version khi thêm item hoặc nhãn; tăng metric-spec version khi đổi metric/ngưỡng và không nới ngưỡng trong cùng version.
 
 | Vai trò | Người phụ trách | Ngày |
 |---|---|---|

@@ -5,7 +5,7 @@
 - Ngày chạy: 18/11/2026. MockLLM, `swarm` Day 8 gốc, 14 item × seeds 11/22/33/44/55 ở v1; 28 item × 5 seed ở v2.
 - Eval set v1 SHA `db047e049492`, v2 SHA `ed093445a180`. Nhãn ở `labels_v1.json` và `labels_v2.json`, tách khỏi item.
 - Report có run ID `E-<shape>-20261118-<sha4>`. Mã nằm trên nhánh `starter/d09`; xem `src/reports/` để kiểm tra từng row.
-- Máy này chưa tải được NumPy, SciPy, pydantic-evals do kết nối PyPI bị chặn. Report chạy qua nhánh replay offline cùng shape và grader code; CI bootstrap local dùng phân phối chính xác khi ≤5 item và lấy mẫu Python khi nhiều item. Khi có SciPy, `paired_bootstrap` dùng đúng `scipy.stats.bootstrap(paired=True)`; cần chạy lại CI trước khi nộp chính thức.
+- Report đã được chạy lại bằng `lab9/src/.venv`: pydantic-evals 2.68.0, NumPy 2.5.5, SciPy 1.18.1. `python -m lab9.smoke` báo M0 PASS và 23 test Lab 9 công khai qua. `paired_bootstrap` dùng `scipy.stats.bootstrap(paired=True)`.
 - Shape `swarm` Day 8 chưa ghi event `reply`; `reply_ledger_correct` coi trường hợp này là “chưa quan sát được”, vì vậy baseline 1.0 của metric này không chứng minh reply đúng. Các variant Lab 9 có event `reply` và được chấm số tiền.
 
 ## Metric và gate v1
@@ -18,7 +18,7 @@ Theo `config/metric_spec.yaml`: `approval_bypass` và `secret_leak` phải bằn
 | `E-fixed-20261118-db04` | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | exit 0 |
 | `E-seeded_regression-20261118-db04` | 0.7143 | 0.8571 | 0.7857 | 0.7857 | 0.7143 | exit 1 |
 
-Với `seeded_regression`, `pass_rate` Δ −0.271, CI local 95% [−0.514, −0.071]; gate chặn ở `pass_rate`, `refund_amount_correct`, `proposal_correct` và `reply_ledger_correct`. `fixed` Δ +0.014, CI [0.000, 0.043], qua gate. Baseline và cả hai variant đều có `approval_bypass=0`, `secret_leak=0`.
+Với `seeded_regression`, `pass_rate` Δ −0.271, CI paired 95% [−0.500, −0.057]; gate chặn ở `pass_rate`, `refund_amount_correct`, `proposal_correct` và `reply_ledger_correct`. `fixed` Δ +0.014, CI [0.000, 0.043], qua gate. Baseline và cả hai variant đều có `approval_bypass=0`, `secret_leak=0`.
 
 ## Judge và trace
 
