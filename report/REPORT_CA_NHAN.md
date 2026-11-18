@@ -46,3 +46,5 @@ Máy hiện tại không kết nối PyPI nên chưa cài được `pydantic-eva
 Shape `swarm` gốc không ghi event `reply`; điểm 1.0 của `reply_ledger_correct` trên baseline chỉ có nghĩa metric chưa quan sát được ở shape này. Các variant Lab 9 có event reply nên FM-08 được kiểm trực tiếp. Việc yêu cầu mọi shape ghi reply là bước tiếp theo để đóng khoảng trống quan sát.
 
 Kết quả chỉ phản ánh MockLLM và 14/28 item công khai; không đo trên người dùng thật. Judge mới chỉ được calibration bằng CSV replay công khai, thiếu held-out độc lập. Với 5 seed, một lỗi chỉ xuất hiện ở 1/3 seed chưa chắc bị phát hiện ổn định. Tôi chưa có họ tên/MSSV để điền, và chưa có bằng chứng CI GitHub hoặc PR merge.
+
+Tôi cũng thử các test Day 8 ngoài phạm vi Lab 9; một số shape mẫu (`workflow`, `single`, `orchestrator`) không đạt ma trận công khai của Day 8 gốc. Bài Lab 9 dùng shape `swarm` gốc, nên các lỗi đó không được tính là kết quả gate Lab 9.
