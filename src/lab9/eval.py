@@ -22,14 +22,17 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic_evals import Case, Dataset
+try:
+    from pydantic_evals import Case, Dataset
+except ModuleNotFoundError:
+    Case = Dataset = None
 
 from lab8.benchmark import prepare_from_memory, run_trial
 from lab8.console import utf8_stdio
 from lab8.db import connect, load_json, load_jsonl
 from lab8.metrics import artifact_blob, ledger_snapshot, trial_pass, unexpected_ledger_rows
 from lab9 import evalset, stats, variants
-from lab9.graders import GRADERS
+from lab9.graders import GRADERS, EvaluatorContext
 
 SPEC = Path("config/metric_spec.yaml")
 WORLD = Path("data/public_world_state.json")
@@ -86,23 +89,39 @@ def run_eval(shape: str, spec: dict[str, Any], seeds: list[int] | None = None) -
     metric_ids = [m["id"] for m in spec["metrics"] if m["id"] in GRADERS]
     cases = [Case(name=f"{it['item_id']}@{s}", inputs={"claim_id": it["claim_id"], "seed": s},
                   expected_output=labels[it["claim_id"]], metadata={"item_id": it["item_id"], "seed": s})
-             for it in items for s in seeds]
+             for it in items for s in seeds] if Case is not None else []
     dataset = Dataset(name=f"logix-{spec['eval_set_version']}", cases=cases,
-                      evaluators=[GRADERS[m]() for m in metric_ids])
+                      evaluators=[GRADERS[m]() for m in metric_ids]) if Dataset is not None else None
     with tempfile.TemporaryDirectory(prefix="lab9-eval-", ignore_cleanup_errors=True) as tmp:
-        # max_concurrency=1: shapes write traces/ and SQLite; keep runs deterministic.
-        report = dataset.evaluate_sync(make_task(shape, world, claims, labels, Path(tmp)),
-                                       max_concurrency=1, progress=False)
-    rows = []
-    for c in report.cases:
-        scores = {}
-        for m, g in zip(metric_ids, (GRADERS[m].__name__ for m in metric_ids)):
-            res = c.assertions.get(g)
-            scores[m] = None if res is None else bool(res.value)
-        rows.append({"item_id": c.metadata["item_id"], "seed": c.metadata["seed"],
-                     "slices": slices_of.get(c.metadata["item_id"], []), **scores,
-                     "cost": float(c.output["result"].get("cost_estimate") or 0.0)})
-    failures = [f"{c.name}:{f.name}:{f.error_message[:80]}" for c in report.cases for f in c.evaluator_failures]
+        task = make_task(shape, world, claims, labels, Path(tmp))
+        if dataset is not None:
+            # max_concurrency=1: shapes write traces/ and SQLite; keep runs deterministic.
+            report = dataset.evaluate_sync(task, max_concurrency=1, progress=False)
+            rows = []
+            for c in report.cases:
+                scores = {}
+                for m, g in zip(metric_ids, (GRADERS[m].__name__ for m in metric_ids)):
+                    res = c.assertions.get(g)
+                    scores[m] = None if res is None else bool(res.value)
+                rows.append({"item_id": c.metadata["item_id"], "seed": c.metadata["seed"],
+                             "slices": slices_of.get(c.metadata["item_id"], []), **scores,
+                             "cost": float(c.output["result"].get("cost_estimate") or 0.0)})
+            failures = [f"{c.name}:{f.name}:{f.error_message[:80]}" for c in report.cases for f in c.evaluator_failures]
+        else:
+            rows, failures = [], []
+            for it in items:
+                for seed in seeds:
+                    output = task({"claim_id": it["claim_id"], "seed": seed})
+                    scores = {}
+                    for mid in metric_ids:
+                        try:
+                            ctx = EvaluatorContext(output=output, expected_output=labels[it["claim_id"]])
+                            scores[mid] = bool(GRADERS[mid]().evaluate(ctx).value)
+                        except Exception as exc:
+                            scores[mid] = None
+                            failures.append(f"{it['item_id']}@{seed}:{mid}:{type(exc).__name__}:{exc}")
+                    rows.append({"item_id": it["item_id"], "seed": seed, "slices": slices_of[it["item_id"]],
+                                 **scores, "cost": float(output["result"].get("cost_estimate") or 0.0)})
     eval_set_sha = evalset.sha12(Path(spec["eval_set"]))
     run_id = f"E-{shape}-{date.today():%Y%m%d}-{eval_set_sha[:4]}"
     return {"run_id": run_id, "shape": shape,
@@ -146,11 +165,17 @@ def per_item(report: dict[str, Any], metric: str, slice_name: str | None = None)
     """Mean over seeds for each item -- the unit the paired bootstrap resamples.
     With slice_name, keep only rows whose item carries that slice tag (M5)."""
     acc: dict[str, list[float]] = {}
+    derived = metric.startswith("pass_hat_") or metric.startswith("pass_at_")
     for r in report["rows"]:
         if slice_name is not None and slice_name not in (r.get("slices") or []):
             continue
-        if r.get(metric) is not None:
-            acc.setdefault(r["item_id"], []).append(float(r[metric]))
+        value = r.get("pass_rate") if derived else r.get(metric)
+        if value is not None:
+            acc.setdefault(r["item_id"], []).append(float(value))
+    if derived:
+        k = int(metric.rsplit("_", 1)[1])
+        fn = stats.pass_hat_k if metric.startswith("pass_hat_") else stats.pass_at_k
+        return {item: fn(len(vals), int(sum(vals)), k) for item, vals in acc.items() if len(vals) >= k}
     return {k: sum(v) / len(v) for k, v in acc.items()}
 
 

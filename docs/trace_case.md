@@ -1,30 +1,14 @@
-# Trace case: từ trace tới quyết định sai đầu tiên
+# Trace case cá nhân: C-002@11
 
-Một trace case trả lời một câu: **bước nào là bước sai đầu tiên**, và test nào sẽ bắt được nó lần sau.
-
-```bash
-cd src
-python -m lab9.trace_case --shape seeded_regression --claim C-002 --seed 11
-python -m lab9.trace_case --shape fixed --claim C-002 --seed 11   # đối chứng
-```
-
-Lệnh in ra ba phần: các event trong trace (`reply`, `decision`, `model_override`, `error` …), ledger so với nhãn, và lý do của grader Lab 8.
-
-## Mẫu điền (mỗi bạn 1 case, lấy từ trial đang fail trong report)
-
-| Trường | Nội dung |
+| Trường | Quan sát |
 |---|---|
-| Trial | `<shape> <claim>@<seed>`, run ID trong report |
-| Triệu chứng | Grader nào fail; reply nói gì so với ledger ghi gì |
-| Bước sai đầu tiên | Số thứ tự event + kind + trích payload (≤1 dòng) |
-| Vì sao là bước *đầu tiên* | Các bước trước đó đúng ra sao (dẫn số event) |
-| Failure mode | Mã FM-xx trong `docs/failure_taxonomy.md` |
-| Đối chứng | Cùng claim@seed trên shape `fixed`: bước đó khác thế nào |
-| Regression test | Tên test + grader/assert nào bắt được; đã thấy fail trên variant lỗi và pass trên `fixed` chưa |
-| Chưa chắc chắn | Điều trace không chứng minh được |
+| Trial | `seeded_regression C-002@11`, report `E-seeded_regression-20261118-db04` |
+| Triệu chứng | Lab 8 FAIL: `status resolved != denied`; ledger hoàn 20.000đ trong khi nhãn 0đ. Reply xác nhận 20.000đ. |
+| Bước sai đầu tiên | Event 3 `model_override`: `{"delay_days": 5}`. |
+| Vì sao đầu tiên | Event 1 bàn giao đúng claim; event 2 `investigator` đã đọc đơn O-202 từ DB. Event 3 đi trước quote sai ở event 4. |
+| Failure mode | FM-03 `ticket_trust`. |
+| Đối chứng | `fixed C-002@11`: không có override; event 3 `quote` trả `amount_vnd=0`, status `denied`, ledger 0đ, Lab 8 PASS. |
+| Regression test | Item `E-002` của eval set v1 mang FM-03. `DbFactKept` phát hiện override; `TrialPass` và `RefundAmountCorrect` fail trên variant, pass trên `fixed`. Gate chặn variant tại `pass_rate`. |
+| Chưa chắc chắn | Trace MockLLM chứng minh đường chạy thử này; chưa xác nhận tần suất lỗi với model thật. |
 
-## Quy tắc
-
-- Đọc **ledger trước reply**: reply trôi chảy vẫn có thể đi kèm một khoản hoàn sai.
-- "Bước sai đầu tiên" phải dẫn số event cụ thể, không phải "agent bị nhầm".
-- Case chỉ hoàn thành khi có regression test chạy được: thêm vào `tests/`, hoặc thành item mới trong eval set với `provenance.from_trace`.
+Tái hiện bằng `python -m lab9.trace_case --shape seeded_regression --claim C-002 --seed 11`, rồi thay shape bằng `fixed`.

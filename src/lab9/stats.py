@@ -10,8 +10,6 @@ from __future__ import annotations
 from collections.abc import Sequence
 from math import comb
 
-import numpy as np
-from scipy.stats import bootstrap
 
 POS = "FAIL"   # the judge's job is to FIND failures, so FAIL is the positive class
 
@@ -66,10 +64,27 @@ def paired_bootstrap(a: Sequence[float], b: Sequence[float], *, n_resamples: int
     # TODO M4
     if len(a) != len(b) or not a:
         raise ValueError("paired nonempty samples required")
-    x, y = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
-    delta = float(np.mean(x - y))
-    if np.array_equal(x, y):
+    diffs = [float(u) - float(v) for u, v in zip(a, b)]
+    delta = sum(diffs) / len(diffs)
+    if all(v == 0 for v in diffs):
         return 0.0, 0.0, 0.0
+    try:
+        import numpy as np
+        from scipy.stats import bootstrap
+    except ModuleNotFoundError:
+        from itertools import product
+        import random
+        draw = random.Random(rng)
+        if len(diffs) <= 5:
+            estimates = sorted(sum(sample) / len(diffs) for sample in product(diffs, repeat=len(diffs)))
+        else:
+            estimates = sorted(sum(diffs[draw.randrange(len(diffs))] for _ in diffs) / len(diffs)
+                               for _ in range(n_resamples))
+        n_est = len(estimates)
+        lo = estimates[max(0, int((1 - confidence) / 2 * n_est))]
+        hi = estimates[min(n_est - 1, int((1 + confidence) / 2 * n_est))]
+        return delta, lo, hi
+    x, y = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
     result = bootstrap((x, y), lambda u, v: np.mean(u - v), paired=True,
                        method="percentile", n_resamples=n_resamples,
                        confidence_level=confidence, rng=np.random.default_rng(rng))
